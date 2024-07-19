@@ -17,7 +17,7 @@ echo "Cloning input data repository..."
 git clone "https://$GITHUB_USERNAME:$GITHUB_TOKEN@github.com/weberon/$WEBSITE_DATA_REPO.git" input_data_repo || { echo "Failed to clone input data repository"; exit 1; }
 
 echo "Cloning Mautic tracker repository..."
-hg clone -r $DCS_MAUTIC_TRACKER --insecure http://$HG_USER:$HG_PASSWORD@$MAUTIC_TRACKER
+git clone "https://$GITHUB_USERNAME:$GITHUB_TOKEN@$MAUTIC_TRACKER"
 
 echo "Repositories cloned successfully."
 
