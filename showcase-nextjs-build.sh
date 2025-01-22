@@ -143,6 +143,54 @@ copyFoldersToPublic() {
     echoEnd "$processInfo"
 }
 
+# Function to rename folders based on renameUtils.mjs
+renameFolders() {
+    local dir="$1"
+    echo "Renaming folders in $dir"
+    for folder in "$dir"/*; do
+        if [ -d "$folder" ]; then
+            folder_name=$(basename "$folder")
+            # Skip the global directory
+            if [ "$folder_name" == "global" ]; then
+                continue
+            fi
+            # Check if folder_name consists of only digits and dashes
+            if [[ $folder_name =~ ^[0-9-]+$ ]]; then
+                # Get the new folder name using the JavaScript script
+                new_folder_name=$(node -e "
+                    import('/var/jenkins_home/workspace/LANDING_PAGES/LANDING_PAGES-BLUE/lp-showcase-nextjs/code_repo/utils/renameUtils.mjs')
+                        .then(({ getPropertyOutputDirectoryName }) => {
+                            console.log(getPropertyOutputDirectoryName('$folder_name'));
+                        })
+                        .catch((error) => {
+                            console.error('Error:', error);
+                            process.exit(1);
+                        });
+                ")
+                if [ $? -ne 0 ]; then
+                    echo "Error: JavaScript execution failed for $folder_name"
+                    exit 1
+                fi
+
+                new_folder_name=$(echo "$new_folder_name" | tr -d '\r') # Remove any carriage return characters
+
+                if [ -n "$new_folder_name" ]; then
+                    mv "$folder" "$dir/$new_folder_name"
+                    if [ $? -ne 0 ]; then
+                        echo "Error: Failed to rename $folder_name to $new_folder_name"
+                        exit 1
+                    fi
+                    echo "Renamed $folder_name to $new_folder_name"
+                else
+                    echo "Error: New folder name is empty for $folder_name"
+                fi
+            else
+                echo "Skipping $folder_name as it does not match the pattern"
+            fi
+        fi
+    done
+}
+
 # Function to rename folders in the data directory inside the public directory
 renamingPublicDataDirectories() {
     # Navigate to the data directory inside public
