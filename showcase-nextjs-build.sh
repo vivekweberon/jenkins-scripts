@@ -143,6 +143,16 @@ copyFoldersToPublic() {
     echoEnd "$processInfo"
 }
 
+# Function to rename folders in the data directory inside the public directory
+renamingPublicDataDirectories() {
+    # Navigate to the data directory inside public
+    cd public/data
+    # Call the renameFolders function
+    renameFolders .
+    # Navigate back to the original directory
+    cd ../../ || { echo "Error: Failed to navigate back to the previous directory"; exit 1; }
+}
+
 # Function to build the project
 buildProject() {
     processInfo="Building lp-showcase-nextjs"
@@ -252,6 +262,7 @@ copyDataFolders
 copyMauticTrackerJSFiles
 listDataFolderContents
 copyFoldersToPublic
+renamingPublicDataDirectories
 buildProject
 checkForWebsiteType
 copyWebsiteToGithubRepo
