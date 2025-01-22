@@ -87,42 +87,18 @@ installDependencies() {
     echoEnd "$processInfo"
 }
 
-# Function to remove .txt files from the input_data_repo directory
-removeTxtFiles() {
-    echo "Removing .txt files from the input data repository..."
-    find "$WORKSPACE/input_data_repo" -name "*.txt" -type f -delete || { echo "Error: Failed to remove .txt files"; exit 1; }
-}
-
-runValidation() {
-    echo "Removing .md and .txt files..."
-    find $WORKSPACE/input_data_repo -type f \( -name "*.md" -o -name "*.txt" \) -delete
-
-    echo "Running validation script..."
-    node utils/Validation.js --inputDir $WORKSPACE/$INPUTDIR_PATH_FOR_VALIDATION || { echo "Error: Validation failed"; exit 1; }
-    echo "Validation completed successfully."
-}
-
 # Function to create the data and public folders if they don't exist
 createFolders() {
     mkdir -p data public
 }
 
-# Function to copy numbered folders from the input data repository to the data directory in the code repository
-copyNumberedFolders() {
-    echo "Copying numbered folders from input_data_repo to data directory in code_repo"
+# Function to copy numbered, global, and home folders from input_data_repo to the data directory in code_repo
+copyDataFolders() {
+    echo "Copying numbered, global, and home folders from input_data_repo to data directory in code_repo"
     for folder in ../input_data_repo/*; do
-        if [[ -d "$folder" && "$folder" =~ ^../input_data_repo/[0-9-]+$ ]]; then
-            cp -r "$folder" data/ || { echo "Error: Failed to copy $(basename "$folder") to data directory"; exit 1; }
-        fi
-    done
-}
-
-# Function to copy global and home directories to the code_repo directory
-copySpecialFolders() {
-    echo "Copying global and home directories to code_repo"
-    for special_folder in ../input_data_repo/global ../input_data_repo/home; do
-        if [[ -d "$special_folder" ]]; then
-            cp -r "$special_folder" . || { echo "Error: Failed to copy $(basename "$special_folder") to code_repo"; exit 1; }
+        if [[ -d "$folder" ]]; then
+            folder_name=$(basename "$folder")
+            cp -r "$folder" data/ || { echo "Error: Failed to copy $folder_name to data directory"; exit 1; }
         fi
     done
 }
@@ -140,25 +116,7 @@ listDataFolderContents() {
     ls -l data
 }
 
-# Function to remove data.yaml files from property folders in the public directory
-removeDataYaml() {
-    # Move into the public directory
-    cd ../public/data || { echo "Error: Public directory not found"; exit 1; }
-
-    # Iterate through each property folder
-    for folder in */; do
-        if [ -f "$folder/data.yaml" ]; then
-            rm "$folder/data.yaml" || { echo "Error removing data.yaml from $folder"; exit 1; }
-            echo "Removed data.yaml from $folder"
-        else
-            echo "No data.yaml found in $folder"
-        fi
-    done
-
-    # Navigate back to the previous directory
-    cd ../data || { echo "Error: Failed to navigate back to the data directory"; exit 1; }
-}
-
+# Function to copy data and global directories to public and remove data.yaml files
 copyFoldersToPublic() {
     processInfo="Copying data and global directories to public, then removing data.yaml files"
     echoStart "$processInfo"
@@ -169,9 +127,6 @@ copyFoldersToPublic() {
     # Copy everything from data to public/data directory
     cp -r data/* public/data/ || { echo "Error: Failed to copy data to public/data directory"; exit 1; }
 
-    # Copy the global directory to public directory
-    cp -r global public/data/ || { echo "Error: Failed to copy global directory to public/data directory"; exit 1; }
-
     # Navigate to the public/data directory
     cd public/data || { echo "Error: Failed to navigate to the public/data directory"; exit 1; }
 
@@ -181,73 +136,12 @@ copyFoldersToPublic() {
     # Navigate back to the previous directory
     cd ../../ || { echo "Error: Failed to navigate back to the previous directory"; exit 1; }
 
-    # Copy images from global directory to images directory in public
+    # Copy images from global/images to public/images directory
     mkdir -p public/images || { echo "Error: Failed to create images directory inside public"; exit 1; }
-    cp -r global/images/* public/images/ || { echo "Error: Failed to copy images to public/images directory"; exit 1; }
+    cp -r data/global/images/* public/images/ || { echo "Error: Failed to copy images to public/images directory"; exit 1; }
 
     echoEnd "$processInfo"
 }
-
-
-# Function to rename folders based on renameUtils.mjs
-renameFolders() {
-    local dir="$1"
-    echo "Renaming folders in $dir"
-    for folder in "$dir"/*; do
-        if [ -d "$folder" ]; then
-            folder_name=$(basename "$folder")
-            # Skip the global directory
-            if [ "$folder_name" == "global" ]; then
-                continue
-            fi
-            # Check if folder_name consists of only digits and dashes
-            if [[ $folder_name =~ ^[0-9-]+$ ]]; then
-                # Get the new folder name using the JavaScript script
-                new_folder_name=$(node -e "
-                    import('/var/jenkins_home/workspace/LANDING_PAGES/LANDING_PAGES-BLUE/lp-showcase-nextjs/code_repo/utils/renameUtils.mjs')
-                        .then(({ getPropertyOutputDirectoryName }) => {
-                            console.log(getPropertyOutputDirectoryName('$folder_name'));
-                        })
-                        .catch((error) => {
-                            console.error('Error:', error);
-                            process.exit(1);
-                        });
-                ")
-                if [ $? -ne 0 ]; then
-                    echo "Error: JavaScript execution failed for $folder_name"
-                    exit 1
-                fi
-
-                new_folder_name=$(echo "$new_folder_name" | tr -d '\r') # Remove any carriage return characters
-
-                if [ -n "$new_folder_name" ]; then
-                    mv "$folder" "$dir/$new_folder_name"
-                    if [ $? -ne 0 ]; then
-                        echo "Error: Failed to rename $folder_name to $new_folder_name"
-                        exit 1
-                    fi
-                    echo "Renamed $folder_name to $new_folder_name"
-                else
-                    echo "Error: New folder name is empty for $folder_name"
-                fi
-            else
-                echo "Skipping $folder_name as it does not match the pattern"
-            fi
-        fi
-    done
-}
-
-# Function to rename folders in the data directory inside the public directory
-renamingPublicDataDirectories() {
-    # Navigate to the data directory inside public
-    cd public/data
-    # Call the renameFolders function
-    renameFolders .
-    # Navigate back to the original directory
-    cd ../../ || { echo "Error: Failed to navigate back to the previous directory"; exit 1; }
-}
-
-
 
 # Function to build the project
 buildProject() {
@@ -262,7 +156,7 @@ buildProject() {
 }
 
 # Function to check for the website type and set up the final repository
-checkForWebsiteType(){
+checkForWebsiteType() {
     cd $WORKSPACE
     mkdir final-repo
     cd final-repo || { echo "Error: final-repo folder does not exist"; exit 1; }
@@ -353,15 +247,11 @@ copyWebsiteToGithubRepo() {
 # Call functions in the correct order
 setUPNodeJS
 installDependencies
-removeTxtFiles
-runValidation
 createFolders
-copyNumberedFolders
-copySpecialFolders
+copyDataFolders
 copyMauticTrackerJSFiles
 listDataFolderContents
 copyFoldersToPublic
-renamingPublicDataDirectories
 buildProject
 checkForWebsiteType
 copyWebsiteToGithubRepo
