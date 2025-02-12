@@ -14,7 +14,7 @@ git clone "$WEBSITE_CODE_REPO" code_repo || { echo "Error: Cloning code reposito
 
 # Clone the input data repository using credentials
 echo "Cloning input data repository..."
-git clone "https://$GITHUB_USERNAME:$GITHUB_TOKEN@github.com/weberon/$WEBSITE_DATA_REPO.git" input_data_repo || { echo "Failed to clone input data repository"; exit 1; }
+git clone "https://$GITHUB_USERNAME:$GITHUB_TOKEN@github.com/vivekweberon/$WEBSITE_DATA_REPO.git" input_data_repo || { echo "Failed to clone input data repository"; exit 1; }
 
 echo "Cloning Mautic tracker repository..."
 git clone "https://$GITHUB_USERNAME:$GITHUB_TOKEN@$MAUTIC_TRACKER"
