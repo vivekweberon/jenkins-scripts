@@ -29,7 +29,11 @@ echo "Listing contents of the code repository:"
 ls -l
 
 # Update basePath value in next.config.js based on Jenkins parameter
-sed -i "s|basePath: \"/lp-showcase\"|basePath: \"/$WEBSITE_DIRECTORY_NAME\"|g" next.config.js
+# sed -i "s|basePath: \"/lp-showcase\"|basePath: \"/$WEBSITE_DIRECTORY_NAME\"|g" next.config.js
+
+# Update basePath value and siteToBuild value in next.config.js based on Jenkins parameter
+sed -i "s|basePath: \"/lp-showcase\"|basePath: \"/$WEBSITE_DIRECTORY_NAME\"|g; s|siteToBuild: 'lp-showcase'|siteToBuild: '$WEBSITE_DIRECTORY_NAME'|g" next.config.js
+
 
 # Print out the contents of next.config.js to verify the changes
 echo "Updated next.config.js:"
