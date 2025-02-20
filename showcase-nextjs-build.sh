@@ -162,7 +162,7 @@ renameFolders() {
             if [[ $folder_name =~ ^[0-9-]+$ ]]; then
                 # Get the new folder name using the JavaScript script
                 new_folder_name=$(node -e "
-                    import('/var/jenkins_home/workspace/LANDING_PAGES/LANDING_PAGES-BLUE/lp-showcase-nextjs-refactored/code_repo/utils/renameUtils.mjs')
+                    import('/var/jenkins_home/workspace/LANDING_PAGES/LANDING_PAGES-BLUE/lp-showcase-nextjs/code_repo/utils/renameUtils.mjs')
                         .then(({ getPropertyOutputDirectoryName }) => {
                             console.log(getPropertyOutputDirectoryName('$folder_name'));
                         })
@@ -250,9 +250,9 @@ checkForWebsiteType() {
     fi
 
     # Read commit hash from git_log.txt
-    commit_hash=$(awk '{print $2}' "$WORKSPACE/lp-showcase-nextjs-refactored/code_repo/.git/logs/HEAD")
+    commit_hash=$(awk '{print $2}' "$WORKSPACE/lp-showcase-nextjs/code_repo/.git/logs/HEAD")
     # Read Git repository URL
-    git_repo=$(grep -oP '(?<=clone: from ).*' "$WORKSPACE/lp-showcase-nextjs-refactored/code_repo/.git/logs/HEAD")
+    git_repo=$(grep -oP '(?<=clone: from ).*' "$WORKSPACE/lp-showcase-nextjs/code_repo/.git/logs/HEAD")
     # Output file
     output_file="$WORKSPACE/final-repo/git_log.txt"
     # Write to the output file
