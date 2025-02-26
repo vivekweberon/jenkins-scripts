@@ -66,14 +66,14 @@ echo "Data repo path (to be used as gitfolder): $DATA_REPO_PATH"
 echo "Dataset name: $datasetname"
 
 # Update the basePath value in next.config.js (assumed to be in the code repo root)
-nextConfigFile="$CODE_REPO_DIR/next.config.js"
-if [ -f "$nextConfigFile" ]; then
-    echo "Updating basePath in $nextConfigFile to '/$datasetname'"
-    sed -i "s/\(basePath:\s*\)['\"][^'\"]*['\"]/\\1'\/$datasetname'/" "$nextConfigFile"
-    chkCMD
-else
-    echo "Warning: next.config.js not found at $nextConfigFile"
-fi
+# nextConfigFile="$CODE_REPO_DIR/next.config.js"
+# if [ -f "$nextConfigFile" ]; then
+#     echo "Updating basePath in $nextConfigFile to '/$datasetname'"
+#     sed -i "s/\(basePath:\s*\)['\"][^'\"]*['\"]/\\1'\/$datasetname'/" "$nextConfigFile"
+#     chkCMD
+# else
+#     echo "Warning: next.config.js not found at $nextConfigFile"
+# fi
 
 # Set up Node.js before building
 setUPNodeJS
@@ -92,7 +92,7 @@ node builder.js \
   --targetdomain="" \
   --gitfolder="$DATA_REPO_PATH" \
   --datasetname="$datasetname" \
-  --basepath="" \
+  --basepath="/$datasetname" \
   --enableMauticTracking="no" \
   --enableMauticForm="no" \
   --mauticurl=""
