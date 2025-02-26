@@ -98,21 +98,21 @@ node builder.js \
   --mauticurl=""
 
 # After the build, rename the out directory to the datasetname
-# if [ -d "out" ]; then
-#     echo "Renaming 'out' directory to '$datasetname'"
-#     mv out "$datasetname"
-#     chkCMD
-# else
-#     echo "Warning: 'out' directory not found."
-# fi
+if [ -d "out" ]; then
+    echo "Renaming 'out' directory to '$datasetname'"
+    mv out "$datasetname"
+    chkCMD
+else
+    echo "Warning: 'out' directory not found."
+fi
 
-# # Copy the renamed directory to the root level of the workspace for easy download
-# if [ -n "$WORKSPACE" ]; then
-#     echo "Copying '$datasetname' directory to workspace root ($WORKSPACE)..."
-#     cp -r "$datasetname" "$WORKSPACE/"
-#     chkCMD
-# else
-#     echo "WORKSPACE environment variable not set. Skipping copy to workspace root."
-# fi
+# Copy the renamed directory to the root level of the workspace for easy download
+if [ -n "$WORKSPACE" ]; then
+    echo "Copying '$datasetname' directory to workspace root ($WORKSPACE)..."
+    cp -r "$datasetname" "$WORKSPACE/"
+    chkCMD
+else
+    echo "WORKSPACE environment variable not set. Skipping copy to workspace root."
+fi
 
 echo "Script execution completed."
