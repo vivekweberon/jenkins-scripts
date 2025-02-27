@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DATA_REPO_DIR="flexibleflyer"            # Data repo will be cloned here
+DATA_REPO_DIR="flexibleflyer-data"            # Data repo will be cloned here
 CODE_REPO_DIR="FlexibleFlyer-code"       # Code repo will be cloned here
 CODE_EXEC_DIR="$CODE_REPO_DIR/flexibleFlyer"  # Directory inside code repo where builder.js is located
 
@@ -45,35 +45,25 @@ setUPNodeJS() {
 }
 
 # Ensure all required parameters are provided
-if [ -z "$datasetname" ] || [ -z "$github_username" ] || [ -z "$github_token" ] || [ -z "$vcs_username" ] || [ -z "$vcs_password" ]; then
-    echo "Error: One or more required parameters (datasetname, github_username, github_token, vcs_username, vcs_password) are not set."
+if [ -z "$DATASET_NAME" ] || [ -z "$GITHUB_USERNAME" ] || [ -z "$GITHUB_TOKEN" ] || [ -z "$VCS_USERNAME" ] || [ -z "$VCS_PASSWORD" ]; then
+    echo "Error: One or more required parameters (DATASET_NAME, GITHUB_USERNAME, GITHUB_TOKEN, VCS_USERNAME, VCS_PASSWORD) are not set."
     exit 1
 fi
 
 # Clone the data repository (GitHub) using provided credentials and branch
 echo "Cloning data repository from GitHub (branch: $BRANCH)..."
-git clone -b "$BRANCH" --single-branch "https://$github_username:$github_token@$DATA_REPO_URL" "$DATA_REPO_DIR"
+git clone -b "$BRANCH" --single-branch "https://$GITHUB_USERNAME:$GITHUB_TOKEN@$DATA_REPO_URL" "$DATA_REPO_DIR"
 chkCMD
 
 # Clone the code repository (Mercurial) using provided credentials and branch
 echo "Cloning code repository from VCS (branch: $BRANCH)..."
-hg clone -b "$BRANCH" "http://$vcs_username:$vcs_password@$CODE_REPO_URL" "$CODE_REPO_DIR"
+hg clone -b "$BRANCH" "http://$VCS_USERNAME:$VCS_PASSWORD@$CODE_REPO_URL" "$CODE_REPO_DIR"
 chkCMD
 
 # Get absolute path of the data repo (to be passed as gitfolder)
 DATA_REPO_PATH="$(pwd)/$DATA_REPO_DIR"
 echo "Data repo path (to be used as gitfolder): $DATA_REPO_PATH"
-echo "Dataset name: $datasetname"
-
-# Update the basePath value in next.config.js (assumed to be in the code repo root)
-# nextConfigFile="$CODE_REPO_DIR/next.config.js"
-# if [ -f "$nextConfigFile" ]; then
-#     echo "Updating basePath in $nextConfigFile to '/$datasetname'"
-#     sed -i "s/\(basePath:\s*\)['\"][^'\"]*['\"]/\\1'\/$datasetname'/" "$nextConfigFile"
-#     chkCMD
-# else
-#     echo "Warning: next.config.js not found at $nextConfigFile"
-# fi
+echo "Dataset name: $DATASET_NAME"
 
 # Set up Node.js before building
 setUPNodeJS
@@ -91,16 +81,16 @@ echo "Running builder.js..."
 node builder.js \
   --targetdomain="" \
   --gitfolder="$DATA_REPO_PATH" \
-  --datasetname="$datasetname" \
-  --basepath="/$datasetname" \
+  --DATASET_NAME="$DATASET_NAME" \
+  --basepath="/$OUTPUT_DIR_NAME" \
   --enableMauticTracking="no" \
   --enableMauticForm="no" \
   --mauticurl=""
 
-# After the build, rename the out directory to the datasetname
+# After the build, rename the out directory to the DATASET_NAME
 if [ -d "out" ]; then
-    echo "Renaming 'out' directory to '$datasetname'"
-    mv out "$datasetname"
+    echo "Renaming 'out' directory to '$DATASET_NAME'"
+    mv out "$DATASET_NAME"
     chkCMD
 else
     echo "Warning: 'out' directory not found."
@@ -108,8 +98,8 @@ fi
 
 # Copy the renamed directory to the root level of the workspace for easy download
 if [ -n "$WORKSPACE" ]; then
-    echo "Copying '$datasetname' directory to workspace root ($WORKSPACE)..."
-    cp -r "$datasetname" "$WORKSPACE/"
+    echo "Copying '$DATASET_NAME' directory to workspace root ($WORKSPACE)..."
+    cp -r "$DATASET_NAME" "$WORKSPACE/"
     chkCMD
 else
     echo "WORKSPACE environment variable not set. Skipping copy to workspace root."
