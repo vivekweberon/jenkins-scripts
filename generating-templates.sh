@@ -90,7 +90,7 @@ node builder.js \
 # After the build, rename the out directory to the DATASET_NAME
 if [ -d "out" ]; then
     echo "Renaming 'out' directory to '$DATASET_NAME'"
-    mv out "$DATASET_NAME"
+    mv out "$OUTPUT_DIR_NAME"
     chkCMD
 else
     echo "Warning: 'out' directory not found."
