@@ -73,7 +73,7 @@ cd "$CODE_EXEC_DIR" || exit 1
 
 # Install dependencies before running builder.js with legacy peer dependency resolution
 echo "Installing dependencies..."
-npm install --legacy-peer-deps
+npm install 
 chkCMD
 
 # Run the builder.js script with the provided parameters
