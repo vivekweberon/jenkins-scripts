@@ -98,8 +98,8 @@ fi
 
 # Copy the renamed directory to the root level of the workspace for easy download
 if [ -n "$WORKSPACE" ]; then
-    echo "Copying '$DATASET_NAME' directory to workspace root ($WORKSPACE)..."
-    cp -r "$DATASET_NAME" "$WORKSPACE/"
+    echo "Copying '$OUTPUT_DIR_NAME' directory to workspace root ($WORKSPACE)..."
+    cp -r "$OUTPUT_DIR_NAME" "$WORKSPACE/"
     chkCMD
 else
     echo "WORKSPACE environment variable not set. Skipping copy to workspace root."
