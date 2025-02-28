@@ -94,6 +94,7 @@ if [ -d "out" ]; then
     chkCMD
 else
     echo "Warning: 'out' directory not found."
+    exit 1
 fi
 
 # Copy the renamed directory to the root level of the workspace for easy download
